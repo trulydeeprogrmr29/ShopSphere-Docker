@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopSphere | Microservices Shop</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Inter, Arial, sans-serif;
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+header {
+    background: #0f172a;
+    color: white;
+    padding: 24px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 26px;
+}
+
+header span {
+    color: #38bdf8;
+}
+
+main {
+    padding: 35px 7%;
+}
+
+.hero {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    color: white;
+    padding: 35px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+}
+
+.hero h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px #00000008;
+}
+
+.card h3 {
+    margin-bottom: 15px;
+}
+
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 9px;
+    border: 1px solid #cbd5e1;
+    font-size: 15px;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.result {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 9px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #64748b;
+}
+
+@media(max-width:600px) {
+    header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .hero h2 {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Shop<span>Sphere</span></h1>
+    <p>Docker Microservices Shop</p>
+</header>
+
+<main>
+
+<section class="hero">
+    <h2>Welcome to ShopSphere 🛒</h2>
+    <p>Explore products, fetch users, and place orders through our microservices architecture.</p>
+    <p class="status" style="margin-top:15px">● API Gateway: localhost:8080</p>
+</section>
+
+<section class="grid">
+
+<div class="card">
+    <h3>👤 Find User</h3>
+    <input id="userId" type="number" value="1" placeholder="User ID">
+    <button onclick="getUser()">Fetch User</button>
+    <div class="result" id="userResult">User information will appear here.</div>
+</div>
+
+<div class="card">
+    <h3>📦 Find Product</h3>
+    <input id="productId" type="number" value="101" placeholder="Product ID">
+    <button onclick="getProduct()">Fetch Product</button>
+    <div class="result" id="productResult">Product information will appear here.</div>
+</div>
+
+<div class="card">
+    <h3>🛒 Place Order</h3>
+    <input id="orderUser" type="number" value="1" placeholder="User ID">
+    <input id="orderProduct" type="number" value="101" placeholder="Product ID">
+    <input id="quantity" type="number" value="2" min="1" placeholder="Quantity">
+    <button onclick="placeOrder()">Place Order</button>
+    <div class="result" id="orderResult">Order response will appear here.</div>
+</div>
+
+</section>
+</main>
+
+<footer>
+    ShopSphere | Powered by Docker, Flask, Nginx & Docker Compose
+</footer>
+
+<script>
+async function apiRequest(path, options = {}) {
+    const response = await fetch(path, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(JSON.stringify(data));
+    }
+
+    return data;
+}
+
+async function getUser() {
+    const result = document.getElementById("userResult");
+    result.textContent = "Loading...";
+
+    try {
+        const data = await apiRequest(
+            `/users/${document.getElementById("userId").value}`
+        );
+        result.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        result.textContent = "Error: " + error.message;
+    }
+}
+
+async function getProduct() {
+    const result = document.getElementById("productResult");
+    result.textContent = "Loading...";
+
+    try {
+        const data = await apiRequest(
+            `/products/${document.getElementById("productId").value}`
+        );
+        result.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        result.textContent = "Error: " + error.message;
+    }
+}
+
+async function placeOrder() {
+    const result = document.getElementById("orderResult");
+    result.textContent = "Placing order...";
+
+    try {
+        const data = await apiRequest("/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: Number(document.getElementById("orderUser").value),
+                product_id: Number(document.getElementById("orderProduct").value),
+                qty: Number(document.getElementById("quantity").value)
+            })
+        });
+
+        result.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        result.textContent = "Error: " + error.message;
+    }
+}
+</script>
+
+</body>
+</html>

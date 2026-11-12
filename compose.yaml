@@ -1,0 +1,56 @@
+x-health: &health
+  interval: 10s
+  timeout: 3s
+  retries: 3
+
+services:
+  users:
+    build:
+      context: .
+      args:
+        SERVICE: users
+    image: shop-users:1.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:5001/health')"]
+      <<: *health
+
+  products:
+    build:
+      context: .
+      args:
+        SERVICE: products
+    image: shop-products:1.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:5002/health')"]
+      <<: *health
+
+  orders:
+    build:
+      context: .
+      args:
+        SERVICE: orders
+    image: shop-orders:1.0
+    restart: unless-stopped
+    environment:
+      USERS_URL: http://users:5001
+      PRODUCTS_URL: http://products:5002
+    depends_on:
+      users:
+        condition: service_healthy
+      products:
+        condition: service_healthy
+
+  gateway:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - "./gateway.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "./frontend:/usr/share/nginx/html:ro"
+    depends_on:
+      - users
+      - products
+      - orders
+    restart: unless-stopped
