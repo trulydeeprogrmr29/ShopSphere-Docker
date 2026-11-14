@@ -7,6 +7,8 @@ A containerized e-commerce microservices demo built with Docker, Docker Compose,
 </p>
 
 ## Overview
+<img width="1807" height="932" alt="image" src="https://github.com/user-attachments/assets/d3caea81-37ae-4ac4-9504-a912b144b771" />
+
 
 ShopSphere demonstrates how a small e-commerce application can be divided into independently containerized services. An Nginx gateway routes incoming requests to the backend APIs, while Docker Compose manages the service lifecycle and dependencies.
 
